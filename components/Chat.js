@@ -12,6 +12,7 @@ export default class ChatScreen extends React.Component {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: backColor }}>
         <Text>Hello Screen2!</Text>
+        {/* hi */}
       </View>
     )
   }
