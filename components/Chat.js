@@ -6,13 +6,12 @@ export default class ChatScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      backColor: this.props.route.params.backColor
+      backColor: this.props.route.params.backColor,
+      name: this.props.route.params.name
     };
   }
   render() {
-    let name = this.props.route.params.name;
-    this.props.navigation.setOptions({ title: name }); /* displays user name in the navigation bar at the top of chat */
-    /*  let backColor = this.route.params.backColor; */
+    this.props.navigation.setOptions({ title: this.state.name }); /* displays user name in the navigation bar at the top of chat */
 
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: this.state.backColor }}>
