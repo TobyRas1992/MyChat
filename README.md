@@ -1,4 +1,4 @@
-# chat-app
+# MyChat
 A native app for mobile devices allowing users to chat but also share images, take pictures and share their location.
 
 # Key Features
