@@ -1,8 +1,6 @@
 import React from 'react';
 import { View, Text, Button, TextInput, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
 
-const image = {};
-
 export default class WelcomeScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -18,7 +16,7 @@ export default class WelcomeScreen extends React.Component {
         <ImageBackground
           style={styles.imgBackground}
           source={require("../assets/background-image.png")}>
-          <View>
+          <View style={styles.main}>
             <Text style={styles.appTitle}>Let's Chat!</Text>
           </View>
           <View styles={styles.chatOptions}>
@@ -28,14 +26,14 @@ export default class WelcomeScreen extends React.Component {
               value={this.state.name}
               placeholder='Type your name here'
             />
-            <View>
-              <Text style={{ color: 'gray' }}>Choose Background Color:</Text>
-            </View>
-            <View style={styles.backColorChoiceView}>
-              <TouchableOpacity style={styles.backColor1} onPress={() => this.setState({ backColor: '#090C08' })} />
-              <TouchableOpacity style={styles.backColor2} onPress={() => this.setState({ backColor: '#474056' })} />
-              <TouchableOpacity style={styles.backColor3} onPress={() => this.setState({ backColor: '#8A95A5' })} />
-              <TouchableOpacity style={styles.backColor4} onPress={() => this.setState({ backColor: '#B9C6AE' })} />
+            <View style={styles.box}>
+              <Text style={styles.BackColorBoxText}>Choose Background Color:</Text>
+              <View style={styles.backColorChoiceView}>
+                <TouchableOpacity style={styles.backColor1} onPress={() => this.setState({ backColor: '#090C08' })} />
+                <TouchableOpacity style={styles.backColor2} onPress={() => this.setState({ backColor: '#474056' })} />
+                <TouchableOpacity style={styles.backColor3} onPress={() => this.setState({ backColor: '#8A95A5' })} />
+                <TouchableOpacity style={styles.backColor4} onPress={() => this.setState({ backColor: '#B9C6AE' })} />
+              </View>
             </View>
             <TouchableOpacity
               style={{ backgroundColor: backColor, height: 60, }}
@@ -51,25 +49,32 @@ export default class WelcomeScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    FlexDirection: 'column'
+    flexDirection: 'column'
   },
   chatOptions: {
     flex: 0.44,
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     width: '88%',
     paddingLeft: '5%',
     paddingRight: '5%',
     flexDirection: 'column',
     justifyContent: 'space-around'
   },
+  main: {
+    flex: 0.5
+  },
   nameInput: {
     height: 40,
+    fontSize: 16,
+    fontWeight: '300',
     borderColor: 'gray',
-    borderWidth: 1
+    borderWidth: 1,
+    borderRadius: 2,
+    paddingLeft: '3%'
   },
   appTitle: {
     fontSize: 45,
-    fontWeight: 600,
+    fontWeight: '600',
     color: '#FFFFFF',
     textAlign: 'center',
     top: 30,
@@ -84,6 +89,15 @@ const styles = StyleSheet.create({
   backColorChoiceView: {
     flexDirection: 'row',
     justifyContent: 'space-between'
+  },
+  box: {
+    flexDirection: 'column'
+  },
+  BackColorBoxText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'grey',
+    marginBottom: 10
   },
   backColor1: {
     backgroundColor: '#090C08',
