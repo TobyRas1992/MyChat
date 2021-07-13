@@ -19,7 +19,7 @@ export default class WelcomeScreen extends React.Component {
           <View style={styles.main}>
             <Text style={styles.appTitle}>Let's Chat!</Text>
           </View>
-          <View styles={styles.chatOptions}>
+          <View style={styles.chatOptions}>
             <TextInput
               style={styles.nameInput}
               onChangeText={(name) => this.setState({ name })}
@@ -49,7 +49,8 @@ export default class WelcomeScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column'
+    flexDirection: 'column',
+    justifyContent: 'space-between'
   },
   chatOptions: {
     flex: 0.44,
@@ -58,7 +59,10 @@ const styles = StyleSheet.create({
     paddingLeft: '5%',
     paddingRight: '5%',
     flexDirection: 'column',
-    justifyContent: 'space-around'
+    justifyContent: 'space-evenly',
+    marginBottom: 20,
+    left: '5%',
+    right: '5%'
   },
   main: {
     flex: 0.5
@@ -91,7 +95,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   box: {
-    flexDirection: 'column'
+    flexDirection: 'column',
+    justifyContent: 'center'
   },
   BackColorBoxText: {
     fontSize: 16,
