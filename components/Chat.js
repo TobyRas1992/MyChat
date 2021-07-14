@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
 //imports chat interface
 import { GiftedChat } from 'react-native-gifted-chat';
 
@@ -51,12 +51,24 @@ export default class ChatScreen extends React.Component {
     this.props.navigation.setOptions({ title: this.state.name }); /* displays user name in the navigation bar at the top of chat */
 
     return (
-      <GiftedChat
-        messages={this.state.messages}
-        onSend={messages => this.onSend(messages)}
-        user={{
-          _id: 1,
-        }} />
+      <View style={styles.container}>
+        <GiftedChat
+          messages={this.state.messages}
+          onSend={messages => this.onSend(messages)}
+          renderUsernameOnMessage={true}
+          placeholder={'Type your message'}
+          user={{
+            _id: 1,
+            name: this.state.name,
+            avatar: '',
+          }} />
+        {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
+      </View>
     )
   }
 }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  }
+});
