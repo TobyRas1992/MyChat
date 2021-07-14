@@ -37,7 +37,7 @@ export default class WelcomeScreen extends React.Component {
             </View>
             <TouchableOpacity
               style={{ backgroundColor: backColor, height: 60, }}
-              onPress={() => this.props.navigation.navigate('Screen2', { name: this.state.name, backColor: this.state.backColor })}>
+              onPress={() => this.props.navigation.navigate('Chat', { name: this.state.name, backColor: this.state.backColor })}>
               <Text style={styles.startText}>Start Chatting</Text>
             </TouchableOpacity>
           </View>
