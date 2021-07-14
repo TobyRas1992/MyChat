@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
 //imports chat interface
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 
 
 export default class ChatScreen extends React.Component {
@@ -21,11 +21,7 @@ export default class ChatScreen extends React.Component {
           _id: 1,
           text: `Welcome to the chat, ${this.state.name}`,
           createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
-          },
+          system: true,
         },
         {
           _id: 2,
@@ -47,14 +43,44 @@ export default class ChatScreen extends React.Component {
     }))
   }
 
+  renderBubble(props) {
+    let backColor = this.state.backColor;
+    if (backColor === '#090C08' || backColor === '#474056') {
+      return (
+        <Bubble
+          {...props}
+          wrapperStyle={{
+            right: {
+              backgroundColor: '#bcb8b1'
+            }
+          }}
+          textProps={{
+            style: { color: 'black' }
+          }}
+          timeTextStyle={{ right: { color: 'black' } }} />
+      );
+    }
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          right: {
+            backgroundColor: 'black'
+          }
+        }}
+      />
+    )
+  }
+
   render() {
     this.props.navigation.setOptions({ title: this.state.name }); /* displays user name in the navigation bar at the top of chat */
 
     return (
-      <View style={styles.container}>
+      <View style={{ flex: 1, backgroundColor: this.state.backColor, }}>
         <GiftedChat
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
+          renderBubble={this.renderBubble.bind(this)}
           renderUsernameOnMessage={true}
           placeholder={'Type your message'}
           user={{
@@ -67,8 +93,3 @@ export default class ChatScreen extends React.Component {
     )
   }
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  }
-});
