@@ -19,7 +19,7 @@ export default class ChatScreen extends React.Component {
       messages: [
         {
           _id: 1,
-          text: 'Hello developer',
+          text: `Welcome to the chat, ${this.state.name}`,
           createdAt: new Date(),
           user: {
             _id: 2,
@@ -29,12 +29,12 @@ export default class ChatScreen extends React.Component {
         },
         {
           _id: 2,
-          text: 'How are you?',
+          text: 'Hi! I am the ChatBot. How are you?',
           createdAt: new Date(),
           user: {
-            _id: 2,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
+            _id: 3,
+            name: 'ChatBot',
+            avatar: 'https://disruptivo.tv/wp-content/uploads/2019/10/chatbot-4071274_1920.jpg',
           },
         }
       ],
