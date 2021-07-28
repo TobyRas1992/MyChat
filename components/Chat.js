@@ -3,8 +3,9 @@ import { View, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
 //imports chat interface
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 
+
 // Firebase
-const firebase = require('firebase');
+import firebase from 'firebase';
 require('firebase/firestore');
 
 export default class ChatScreen extends React.Component {
@@ -20,7 +21,7 @@ export default class ChatScreen extends React.Component {
       measurementId: "G-55GXC552VK"
     };
     // connects to firestore database
-    if (!firebase.apps.length) {
+    if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     };
     this.state = {
