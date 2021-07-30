@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { View, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 //imports chat interface
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
+import AsyncStorage from '@react-native-community/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 
 
 // Firebase
@@ -39,34 +41,50 @@ export default class ChatScreen extends React.Component {
         avatar: null,
       },
       backColor: this.props.route.params.backColor,
+      isConnected: false,
     };
   }
-
 
   componentDidMount() {
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
 
-    // create a reference to the active user's documents
-    this.referenceChatMessages = firebase.firestore().collection('messages');
-    //authenticate the user
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      if (!user) {
-        firebase.auth().signInAnonymously();
-      }
-      // sets user state to currently active user data
-      this.setState({
-        user: {
-          _id: user.uid,
-          name: name,
-          avatar: "https://placeimg.com/140/140/any",
-        },
-        messages: [],
-      });
+    // data fetch handling when online/offline
+    NetInfo.fetch().then(connection => {
+      if (connection.isConnected) {
+        this.setState({
+          isConnected: true,
+        });
+        console.log('user is online');
+        // create a reference to the active user's firestore documents
+        this.referenceChatMessages = firebase.firestore().collection('messages');
+        //authenticate the user
+        this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+          if (!user) {
+            firebase.auth().signInAnonymously();
+          }
+          // sets user state to currently active user data
+          this.setState({
+            user: {
+              _id: user.uid,
+              name: name,
+              avatar: "https://placeimg.com/140/140/any",
+            },
+            messages: [],
+          });
 
-      //listen for collection changes for current user
-      this.unsubscribeMessages = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
+          //listen for collection changes for current user
+          this.unsubscribeMessages = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
+        });
+      } else {
+        console.log('user is offline');
+        this.setState({ isConnected: false })
+        this.getMessages(); //Get messages from asyncStorage
+        Alert.alert('No internet connection. Unable to send messages'); //Ali: why is this not rendering?
+      }
     });
+
+
   }
 
   componentWillUnmount() {
@@ -110,18 +128,53 @@ export default class ChatScreen extends React.Component {
     });
   }
 
-  // when a user clicks send message
+  // gets messages from asyncStorage
+  async getMessages() {
+    let messages = '';
+    try {
+      messages = await AsyncStorage.getItem('messages') || [];
+      this.setState({
+        messages: JSON.parse(messages)
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  //saves messages to asyncStorage
+  async saveMessages() {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  //removes text messages from asyncStorage
+  async deleteMessages() {
+    try {
+      await AsyncStorage.removeItem('messages');
+      this.setState({
+        messages: []
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  // when a user clicks send message in inputToolbar
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }),
       () => {
-        this.addMessage();
+        this.addMessage(); //adds messages to firestore
+        this.saveMessages(); // saves messages to asyncStorage
       }
     );
-
   }
 
+  // styling for user renderBubble
   renderBubble(props) {
     let backColor = this.state.backColor;
     if (backColor === '#090C08' || backColor === '#474056') {
@@ -151,6 +204,17 @@ export default class ChatScreen extends React.Component {
     )
   }
 
+  renderInputToolbar(props) {
+    if (this.state.isConnected == false) {
+      // nothing renders so user cannot send messages
+    } else {
+      return (
+        <InputToolbar
+          {...props} />
+      );
+    }
+  }
+
   render() {
     this.props.navigation.setOptions({ title: this.state.user.name });
 
@@ -160,6 +224,7 @@ export default class ChatScreen extends React.Component {
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           renderBubble={this.renderBubble.bind(this)}
+          renderInputToolbar={this.renderInputToolbar.bind(this)}
           renderUsernameOnMessage={true}
           placeholder={'Type your message'}
           user={this.state.user} />
