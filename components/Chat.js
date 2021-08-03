@@ -177,54 +177,6 @@ export default class ChatScreen extends React.Component {
     }
   }
 
-  // user can pick image from device library
-  pickImage = async () => {
-    const { status } = await Permissions.askAsync(CAMERA_ROLL);
-
-    if (status === 'granted') {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'Images',
-      }).catch(error => console.log(error));
-
-      if (!result.cancelled) {
-        this.setState({
-          image: result
-        });
-      }
-    }
-  }
-
-  //user can send photo taken with device camera 
-  takePhoto = async () => {
-    const { status } = await Permissions.askAsync(CAMERA, CAMERAL_ROLL);
-
-    if (status === 'granted') {
-      let result = await ImagePicker.launchCameraAsync({
-        mediaTypes: 'Images',
-      }).catch(error => console.log(error));
-
-      if (!result.cancelled) {
-        this.setState({
-          image: result
-        });
-      }
-    }
-  }
-
-  getLocation = async () => {
-    const { status } = await Permissions.askAsync(LOCATION);
-
-    if (status === 'granted') {
-      let result = await Location.getCurrentPositionAsync({});
-
-      if (result) {
-        this.setState({
-          location: result,
-        });
-      }
-    }
-
-  }
 
   // when a user clicks send message in inputToolbar
   onSend(messages = []) {
