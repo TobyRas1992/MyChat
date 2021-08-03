@@ -62,7 +62,6 @@ export default class ChatScreen extends React.Component {
   }
 
   componentDidMount() {
-
     // data fetch handling when online/offline
     NetInfo.fetch().then(connection => {
       if (connection.isConnected) {
@@ -121,7 +120,9 @@ export default class ChatScreen extends React.Component {
           _id: data.user._id,
           name: data.user.name,
           avatar: data.user.avatar || null,
-        }
+        },
+        image: data.image || null,
+        location: data.location || null,
       });
     });
     this.setState({

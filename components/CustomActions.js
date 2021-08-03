@@ -1,10 +1,17 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Permissions from 'expo-permissions';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import firebase from 'firebase';
+import 'firebase/firestore';
+import { ThemeProvider } from '@react-navigation/native';
 
 // renders the "+" input area to access photos and maps
 export default class CustomActions extends React.Component {
 
+  //Function which handles the different communication features
   onActionPress = () => {
     const options = [
       'Choose From Library',
@@ -22,17 +29,110 @@ export default class CustomActions extends React.Component {
         switch (buttonIndex) {
           case 0:
             console.log('user wants to pick an image');
-            return;
+            return this.selectImage();
           case 1:
             console.log('user wants to take a photo');
-            return;
+            return this.takePhoto();
           case 2:
             console.log('user wants to get their location');
-          default:
+            return this.getLocation();
         }
       },
     );
   };
+
+  //Select Image from Photo Library
+  selectImage = async () => {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    try {
+      if (status === "granted") {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images, // only images are allowed
+        }).catch((error) => console.log(error));
+        if (!result.cancelled) {
+          const imageUrl = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrl });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  //Take Photo with camera
+  takePhoto = async () => {
+    const { status } = await Permissions.askAsync(
+      Permissions.CAMERA,
+      Permissions.CAMERA_ROLL
+    );
+    try {
+      if (status === "granted") {
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        }).catch((error) => console.log(error));
+
+        if (!result.cancelled) {
+          const imageUrl = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrl });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  //Get Location
+  getLocation = async () => {
+    try {
+      const { status } = await Permissions.askAsync(Permissions.LOCATION);
+      if (status === "granted") {
+        const result = await Location.getCurrentPositionAsync(
+          {}
+        ).catch((error) => console.log(error));
+        const longitude = JSON.stringify(result.coords.longitude);
+        const altitude = JSON.stringify(result.coords.latitude);
+        if (result) {
+          this.props.onSend({
+            location: {
+              longitude: result.coords.longitude,
+              latitude: result.coords.latitude,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  //Upload image to firebase
+  uploadImageFetch = async (uri) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest(); //creates new XMLHttp request
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob"; // sets response type to 'blob'
+      xhr.open("GET", uri, true); // opens connection and retrieves image
+      xhr.send(null);
+    });
+
+    const imageNameBefore = uri.split("/");
+    const imageName = imageNameBefore[imageNameBefore.length - 1];
+
+    const ref = firebase.storage().ref().child(`images/${imageName}`); // creates reference to storage
+
+    const snapshot = await ref.put(blob); // puts blob data into reference
+
+    blob.close(); // closes connection
+
+    return await snapshot.ref.getDownloadURL(); // gets image URL from storage
+  };
+
 
   render() {
     return (<TouchableOpacity
