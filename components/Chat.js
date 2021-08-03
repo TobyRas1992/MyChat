@@ -5,6 +5,16 @@ import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 
+//expo Permissions API and ImagePicker API
+import * as Permissions from 'expo-permissions';
+import * as ImagePicker from 'expo-image-picker';
+
+// location + mapview
+import * as Location from 'expo-location';
+import MapView from 'react-native-maps';
+
+import CustomActions from './CustomActions';
+
 
 // Firebase
 import firebase from 'firebase';
@@ -26,6 +36,10 @@ export default class ChatScreen extends React.Component {
     if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     };
+
+    let userName = this.props.route.params.name;
+    this.props.navigation.setOptions({ title: userName });
+
     this.state = {
       messages: [
         {
@@ -42,12 +56,12 @@ export default class ChatScreen extends React.Component {
       },
       backColor: this.props.route.params.backColor,
       isConnected: false,
+      image: null,
+      location: null,
     };
   }
 
   componentDidMount() {
-    let name = this.props.route.params.name;
-    this.props.navigation.setOptions({ title: name });
 
     // data fetch handling when online/offline
     NetInfo.fetch().then(connection => {
@@ -67,7 +81,7 @@ export default class ChatScreen extends React.Component {
           this.setState({
             user: {
               _id: user.uid,
-              name: name,
+              name: userName, // is this set correctly?
               avatar: "https://placeimg.com/140/140/any",
             },
             messages: [],
@@ -162,6 +176,55 @@ export default class ChatScreen extends React.Component {
     }
   }
 
+  // user can pick image from device library
+  pickImage = async () => {
+    const { status } = await Permissions.askAsync(CAMERA_ROLL);
+
+    if (status === 'granted') {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'Images',
+      }).catch(error => console.log(error));
+
+      if (!result.cancelled) {
+        this.setState({
+          image: result
+        });
+      }
+    }
+  }
+
+  //user can send photo taken with device camera 
+  takePhoto = async () => {
+    const { status } = await Permissions.askAsync(CAMERA, CAMERAL_ROLL);
+
+    if (status === 'granted') {
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: 'Images',
+      }).catch(error => console.log(error));
+
+      if (!result.cancelled) {
+        this.setState({
+          image: result
+        });
+      }
+    }
+  }
+
+  getLocation = async () => {
+    const { status } = await Permissions.askAsync(LOCATION);
+
+    if (status === 'granted') {
+      let result = await Location.getCurrentPositionAsync({});
+
+      if (result) {
+        this.setState({
+          location: result,
+        });
+      }
+    }
+
+  }
+
   // when a user clicks send message in inputToolbar
   onSend(messages = []) {
     this.setState(previousState => ({
@@ -204,15 +267,43 @@ export default class ChatScreen extends React.Component {
     )
   }
 
+  // InputToolbar not rendering when user offline
   renderInputToolbar(props) {
     if (this.state.isConnected == false) {
-      // nothing renders so user cannot send messages
     } else {
       return (
         <InputToolbar
           {...props} />
       );
     }
+  }
+
+  renderCustomActions = (props) => {
+    return <CustomActions {...props} />
+  }
+
+  // renders MapView if currentMessage contains data 
+  renderCustomView(props) {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{
+            width: 150,
+            height: 100,
+            borderRadius: 13,
+            margin: 3
+          }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
   }
 
   render() {
@@ -223,8 +314,10 @@ export default class ChatScreen extends React.Component {
         <GiftedChat
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
+          renderActions={this.renderCustomActions}
           renderBubble={this.renderBubble.bind(this)}
           renderInputToolbar={this.renderInputToolbar.bind(this)}
+          renderCustomView={this.renderCustomView}
           renderUsernameOnMessage={true}
           placeholder={'Type your message'}
           user={this.state.user} />
