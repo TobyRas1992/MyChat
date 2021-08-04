@@ -5,12 +5,6 @@ import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 
-//expo Permissions API and ImagePicker API
-import * as Permissions from 'expo-permissions';
-import * as ImagePicker from 'expo-image-picker';
-
-// location + mapview
-import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
 
 import CustomActions from './CustomActions';

@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import firebase from 'firebase';
 import 'firebase/firestore';
-import { ThemeProvider } from '@react-navigation/native';
+
 
 // renders the "+" input area to access photos and maps
 export default class CustomActions extends React.Component {
