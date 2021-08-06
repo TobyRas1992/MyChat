@@ -74,7 +74,7 @@ export default class ChatScreen extends React.Component {
           this.setState({
             user: {
               _id: user.uid,
-              name: userName, // is this set correctly?
+              name: this.userName, // is this set correctly?
               avatar: "https://placeimg.com/140/140/any",
             },
             messages: [],
@@ -261,7 +261,7 @@ export default class ChatScreen extends React.Component {
         <GiftedChat
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
-          renderActions={this.renderCustomActions}
+          renderActions={this.renderCustomActions.bind(this)}
           renderBubble={this.renderBubble.bind(this)}
           renderInputToolbar={this.renderInputToolbar.bind(this)}
           renderCustomView={this.renderCustomView}

@@ -17,7 +17,7 @@ export default class CustomActions extends React.Component {
       'Choose From Library',
       'Take Picture',
       'Send Location',
-      'Cancel'
+      'Cancel',
     ];
     const cancelButtonIndex = options.length - 1;
     this.context.actionSheet().showActionSheetWithOptions(
@@ -43,7 +43,7 @@ export default class CustomActions extends React.Component {
 
   //Select Image from Photo Library
   selectImage = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    const { status } = await Permissions.askAsync(CAMERA_ROLL); //try "cameraRoll" if it doesn't work
     try {
       if (status === "granted") {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -51,7 +51,7 @@ export default class CustomActions extends React.Component {
         }).catch((error) => console.log(error));
         if (!result.cancelled) {
           const imageUrl = await this.uploadImageFetch(result.uri);
-          this.props.onSend({ image: imageUrl });
+          this.props.onSend({ image: imageUrl }); // assigns the URL to message object
         }
       }
     } catch (error) {
@@ -62,8 +62,8 @@ export default class CustomActions extends React.Component {
   //Take Photo with camera
   takePhoto = async () => {
     const { status } = await Permissions.askAsync(
-      Permissions.CAMERA,
-      Permissions.CAMERA_ROLL
+      CAMERA,
+      CAMERA_ROLL
     );
     try {
       if (status === "granted") {
@@ -72,8 +72,8 @@ export default class CustomActions extends React.Component {
         }).catch((error) => console.log(error));
 
         if (!result.cancelled) {
-          const imageUrl = await this.uploadImageFetch(result.uri);
-          this.props.onSend({ image: imageUrl });
+          const imageUrl = await this.uploadImageFetch(result.uri); // does this retrieve the image's URL?
+          this.props.onSend({ image: imageUrl }); // assigns the URL to message object
         }
       }
     } catch (error) {
@@ -84,7 +84,7 @@ export default class CustomActions extends React.Component {
   //Get Location
   getLocation = async () => {
     try {
-      const { status } = await Permissions.askAsync(Permissions.LOCATION);
+      const { status } = await Permissions.askAsync(LOCATION); // try "location" if it doesn't work
       if (status === "granted") {
         const result = await Location.getCurrentPositionAsync(
           {}
@@ -105,9 +105,10 @@ export default class CustomActions extends React.Component {
     }
   };
 
-  //Upload image to firebase
+  //fetch image and upload to firebase storage 
   uploadImageFetch = async (uri) => {
-    const blob = await new Promise((resolve, reject) => {
+    // 1: convert file to blob
+    const blob = await new Promise((resolve, reject) => { //BLOB: Binary Large Object
       const xhr = new XMLHttpRequest(); //creates new XMLHttp request
       xhr.onload = function () {
         resolve(xhr.response);
@@ -124,7 +125,7 @@ export default class CustomActions extends React.Component {
     const imageNameBefore = uri.split("/");
     const imageName = imageNameBefore[imageNameBefore.length - 1];
 
-    const ref = firebase.storage().ref().child(`images/${imageName}`); // creates reference to storage
+    const ref = firebase.storage().ref().child(`images/${imageName}`); // creates reference to specific image in storage
 
     const snapshot = await ref.put(blob); // puts blob data into reference
 
@@ -171,6 +172,6 @@ const styles = StyleSheet.create({
 });
 
 // creates an object for Context class to define the context type (function).
-CustomActions.contextType = {
+CustomActions.contextTypes = {
   actionSheet: PropTypes.func,
 };
