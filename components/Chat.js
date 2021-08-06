@@ -5,6 +5,10 @@ import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 
+import MapView from 'react-native-maps';
+
+import CustomActions from './CustomActions';
+
 
 // Firebase
 import firebase from 'firebase';
@@ -26,6 +30,10 @@ export default class ChatScreen extends React.Component {
     if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     };
+
+    let userName = this.props.route.params.name;
+    this.props.navigation.setOptions({ title: userName });
+
     this.state = {
       messages: [
         {
@@ -42,13 +50,12 @@ export default class ChatScreen extends React.Component {
       },
       backColor: this.props.route.params.backColor,
       isConnected: false,
+      image: null,
+      location: null,
     };
   }
 
   componentDidMount() {
-    let name = this.props.route.params.name;
-    this.props.navigation.setOptions({ title: name });
-
     // data fetch handling when online/offline
     NetInfo.fetch().then(connection => {
       if (connection.isConnected) {
@@ -67,7 +74,7 @@ export default class ChatScreen extends React.Component {
           this.setState({
             user: {
               _id: user.uid,
-              name: name,
+              name: this.userName, // is this set correctly?
               avatar: "https://placeimg.com/140/140/any",
             },
             messages: [],
@@ -107,7 +114,9 @@ export default class ChatScreen extends React.Component {
           _id: data.user._id,
           name: data.user.name,
           avatar: data.user.avatar || null,
-        }
+        },
+        image: data.image || null,
+        location: data.location || null,
       });
     });
     this.setState({
@@ -162,6 +171,7 @@ export default class ChatScreen extends React.Component {
     }
   }
 
+
   // when a user clicks send message in inputToolbar
   onSend(messages = []) {
     this.setState(previousState => ({
@@ -204,15 +214,43 @@ export default class ChatScreen extends React.Component {
     )
   }
 
+  // InputToolbar not rendering when user offline
   renderInputToolbar(props) {
     if (this.state.isConnected == false) {
-      // nothing renders so user cannot send messages
     } else {
       return (
         <InputToolbar
           {...props} />
       );
     }
+  }
+
+  renderCustomActions = (props) => {
+    return <CustomActions {...props} />
+  }
+
+  // renders MapView if currentMessage contains data 
+  renderCustomView(props) {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{
+            width: 150,
+            height: 100,
+            borderRadius: 13,
+            margin: 3
+          }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
   }
 
   render() {
@@ -223,8 +261,10 @@ export default class ChatScreen extends React.Component {
         <GiftedChat
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
+          renderActions={this.renderCustomActions.bind(this)}
           renderBubble={this.renderBubble.bind(this)}
           renderInputToolbar={this.renderInputToolbar.bind(this)}
+          renderCustomView={this.renderCustomView}
           renderUsernameOnMessage={true}
           placeholder={'Type your message'}
           user={this.state.user} />
