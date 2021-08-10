@@ -35,17 +35,10 @@ export default class ChatScreen extends React.Component {
     this.props.navigation.setOptions({ title: userName });
 
     this.state = {
-      messages: [
-        {
-          _id: 1,
-          text: `Welcome to the chat, ${this.props.route.params.name}`,
-          createdAt: new Date(),
-          system: true,
-        }
-      ],
+      messages: [],
       user: {
         _id: '',
-        name: '',
+        name: userName,
         avatar: null,
       },
       backColor: this.props.route.params.backColor,
@@ -65,7 +58,7 @@ export default class ChatScreen extends React.Component {
         console.log('user is online');
         // create a reference to the active user's firestore documents
         this.referenceChatMessages = firebase.firestore().collection('messages');
-        //authenticate the user
+        //let user log in anonymously 
         this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
           if (!user) {
             firebase.auth().signInAnonymously();
@@ -80,7 +73,7 @@ export default class ChatScreen extends React.Component {
             messages: [],
           });
 
-          //listen for collection changes for current user
+          // save chat history when it's unmounted
           this.unsubscribeMessages = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
         });
       } else {
