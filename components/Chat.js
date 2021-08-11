@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 //imports chat interface
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
-import AsyncStorage from '@react-native-community/async-storage';
+/* import AsyncStorage from '@react-native-community/async-storage';
+ */import { AsyncStorage } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import MapView from 'react-native-maps';
@@ -31,14 +32,12 @@ export default class ChatScreen extends React.Component {
       firebase.initializeApp(firebaseConfig);
     };
 
-    let userName = this.props.route.params.name;
-    this.props.navigation.setOptions({ title: userName });
 
     this.state = {
       messages: [],
       user: {
         _id: '',
-        name: userName,
+        name: '',
         avatar: null,
       },
       backColor: this.props.route.params.backColor,
@@ -49,6 +48,8 @@ export default class ChatScreen extends React.Component {
   }
 
   componentDidMount() {
+    let userName = this.props.route.params.name;
+    this.props.navigation.setOptions({ title: userName });
     // data fetch handling when online/offline
     NetInfo.fetch().then(connection => {
       if (connection.isConnected) {
@@ -67,7 +68,7 @@ export default class ChatScreen extends React.Component {
           this.setState({
             user: {
               _id: user.uid,
-              name: this.userName, // is this set correctly?
+              name: userName, // is this set correctly?
               avatar: "https://placeimg.com/140/140/any",
             },
             messages: [],

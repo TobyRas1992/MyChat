@@ -43,7 +43,7 @@ export default class CustomActions extends React.Component {
 
   //Select Image from Photo Library
   selectImage = async () => {
-    const { status } = await Permissions.askAsync("cameraRoll");
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
     try {
       if (status === "granted") {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -62,9 +62,7 @@ export default class CustomActions extends React.Component {
   //Take Photo with camera
   takePhoto = async () => {
     const { status } = await Permissions.askAsync(
-      "camera",
-      "cameraRoll"
-    );
+      Permissions.CAMERA, Permissions.CAMERA_ROLL);
     try {
       if (status === "granted") {
         const result = await ImagePicker.launchCameraAsync({
@@ -84,7 +82,7 @@ export default class CustomActions extends React.Component {
   //Get Location
   getLocation = async () => {
     try {
-      const { status } = await Permissions.askAsync("location"); // try "location" if it doesn't work
+      const { status } = await Permissions.askAsync(Permissions.LOCATION); // try "location" if it doesn't work
       if (status === "granted") {
         const result = await Location.getCurrentPositionAsync(
           {}
