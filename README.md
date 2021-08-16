@@ -1,6 +1,9 @@
 # MyChat
 A native app for mobile devices allowing users to chat but also share images, take pictures and share their location.
 
+# Demo
+![MyChat Demo](assets/demo.gif)
+
 # Key Features
 - Users can enter their name and choose a background colour for the chat screen.
 - The chat room displays the conversation, an input field (to write a message) and an action button (allowing the user to share image, take a photo and share their geolocation)
